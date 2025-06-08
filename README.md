@@ -12,45 +12,6 @@
 
 ---
 
-## 시스템 구조
-
-```mermaid
-flowchart LR
-    subgraph Frontend
-        UI[React UI]
-    end
-
-    subgraph Backend
-        API[FastAPI]
-        Worker[Celery Worker]
-        Queue[(Redis Queue)]
-        DB[(PostgreSQL)]
-    end
-
-    subgraph Agent
-        ADK[ADK Server]
-        Summary[Summary Agent]
-        Checklist[Checklist Agent]
-    end
-
-    UI -->|1. Upload| API
-    API -->|2. Queue| Queue
-    Queue -->|3. Process| Worker
-    Worker -->|4. Process| ADK
-    ADK -->|5. Chain| Summary
-    Summary -->|6. Chain| Checklist
-    Checklist -->|7. Result| ADK
-    ADK -->|8. Response| Worker
-    Worker -->|9. Store| DB
-    API -->|10. Query| DB
-
-    style Frontend fill:#f9f,stroke:#333,stroke-width:2px
-    style Backend fill:#bbf,stroke:#333,stroke-width:2px
-    style Agent fill:#fbb,stroke:#333,stroke-width:2px
-```
-
----
-
 ## 주요 기능
 
 - 문서 업로드 및 비동기 처리
