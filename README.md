@@ -49,7 +49,7 @@ http://localhost:8000/docs
 
 - Cursor를 활용한 코드 자동완성 및 리팩토링
 - Claude를 통한 코드 리뷰 및 최적화
-- GitHub Copilot을 통한 보일러플레이트 코드 생성
+- Gemini를 통한 LLM 에이전트 구축
 
 ---
 
