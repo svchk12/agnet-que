@@ -1,0 +1,119 @@
+version: "3.8"
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: agent_que_frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: agent_que_backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - uploads_data:/app/uploads
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/guideline_db
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - AGENT_API_URL=http://agent:8001
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      agent:
+        condition: service_started
+    restart: unless-stopped
+
+  celery_worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: agent_que_celery_worker
+    command: celery -A app.core.celery_app worker --loglevel=info --concurrency=1 -Q main-queue
+    volumes:
+      - ./backend:/app
+      - uploads_data:/app/uploads
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/guideline_db
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - AGENT_API_URL=http://agent:8001
+    depends_on:
+      - backend
+      - redis
+      - db
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+
+  agent:
+    build:
+      context: ./guideline_agent
+      dockerfile: Dockerfile
+    container_name: agent_que_agent
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./guideline_agent:/app
+    command: adk api_server --host 0.0.0.0 --port 8001
+    restart: unless-stopped
+
+  db:
+    image: postgres:13
+    container_name: agent_que_db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=guideline_db
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/guideline_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  test_db:
+    image: postgres:15
+    container_name: agent_que_test_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: test_guideline_db
+    ports:
+      - "5434:5432"
+
+  redis:
+    image: redis:6
+    container_name: agent_que_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:
+  uploads_data:
