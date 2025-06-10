@@ -3,9 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
 from app.api import jobs
-from app.core.database import engine, Base
+from app.core.database import Base, SessionLocal, get_db
 import logging
 import time
+import os
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 # 로깅 설정
 logging.basicConfig(
@@ -14,8 +17,20 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# 데이터베이스 테이블 생성
-Base.metadata.create_all(bind=engine)
+# 테스트 환경과 일반 환경의 DB 연결 분리
+if os.environ.get("TESTING", "0") == "1":
+    from app.core.test_config import test_settings
+    DATABASE_URL = test_settings.DATABASE_URL
+else:
+    from app.core.config import settings
+    DATABASE_URL = settings.DATABASE_URL
+
+# 데이터베이스 엔진 생성
+engine = create_engine(DATABASE_URL)
+
+# 테스트 환경이 아닐 때만 테이블 생성
+if os.environ.get("TESTING", "0") != "1":
+    Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Document Processing API",

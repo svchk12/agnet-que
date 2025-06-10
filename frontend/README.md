@@ -37,4 +37,4 @@ npm run build
 ## AI 도구 활용
 
 - Cursor를 통한 컴포넌트 자동 생성
-- GitHub Copilot을 활용한 타입 정의 및 유틸리티 함수 작성
+- Cursor를 통한 로직 구현

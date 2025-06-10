@@ -1,5 +1,11 @@
 from pydantic_settings import BaseSettings
 import os
+from app.core.test_config import test_settings
+
+if os.environ.get("TESTING", "0") == "1":
+    DATABASE_URL = test_settings.DATABASE_URL
+else:
+    DATABASE_URL = "postgresql://postgres:postgres@db:5432/guideline_db"
 
 class Settings(BaseSettings):
     # Redis 설정
@@ -8,7 +14,7 @@ class Settings(BaseSettings):
     REDIS_DB: int = 0
     
     # 데이터베이스 설정
-    DATABASE_URL: str = "postgresql://postgres:postgres@db:5432/guideline_db"
+    DATABASE_URL: str = DATABASE_URL
     
     # Celery 설정
     CELERY_BROKER_URL: str = "redis://redis:6379/0"

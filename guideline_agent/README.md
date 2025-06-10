@@ -39,5 +39,10 @@ adk api_server --host 0.0.0.0 --port 8001
 
 ## AI 도구 활용
 
-- ADK를 통한 에이전트 로직 자동 생성
+- ADK를 통한 에이전트 구현
 - Cursor를 활용한 API 엔드포인트 구현
+
+## 환경변수 설정
+
+GOOGLE_GENAI_USE_VERTEXAI=FALSE
+GOOGLE_API_KEY=Your-KEY

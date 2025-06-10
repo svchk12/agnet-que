@@ -45,4 +45,8 @@ celery -A app.core.celery_app worker --loglevel=info
 ## AI 도구 활용
 
 - Cursor를 통한 API 엔드포인트 자동 생성
-- GitHub Copilot을 활용한 데이터 모델 및 유틸리티 함수 작성
+- Cursor를 통한 테스트 코드 작성 및 테스트 진행
+
+## 테스트
+
+TESTING=1 PYTHONPATH=$PYTHONPATH:. pytest tests/ -v

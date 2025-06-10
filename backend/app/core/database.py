@@ -1,11 +1,16 @@
+import os
+if os.environ.get("TESTING") == "1":
+    from app.core.test_config import test_settings
+    DATABASE_URL = test_settings.DATABASE_URL
+else:
+    from app.core.config import settings
+    DATABASE_URL = settings.DATABASE_URL
+
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-import os
 
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@db:5432/guideline_db")
-
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()

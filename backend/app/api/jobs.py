@@ -128,7 +128,7 @@ async def stream_job_status(
     return StreamingResponse(
         event_generator(),
         media_type="text/event-stream"
-    )
+    ) 
 
 @router.get("/jobs/{job_id}")
 async def get_job_status(
